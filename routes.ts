@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { nurses, units, complianceReports, copilotResponses, followUpTasks as mockFollowUpTasks } from "../client/src/data/mockData";
+import { nurses, units, complianceReports, copilotResponses, followUpTasks as mockFollowUpTasks } from "./shared/mockData";
 import { generateAIResponse } from "./openai";
 import { sendEmail, sendScheduleNotification, sendAlertNotification } from "./email";
 import { getAllTasks, getTaskById, getTasksByStatus, createTask, updateTask, completeTask, processTaskCompletionRequest } from "./tasks";
@@ -13,7 +13,7 @@ import {
   copilotPrompts,
   calendarEvents,
   insertCalendarEventSchema
-} from "../shared/schema";
+} from "./shared/schema";
 import { eq, desc, gte, and } from "drizzle-orm";
 
 // Function to process calendar requests from AI responses

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { followUpTasks } from "../shared/schema";
+import { followUpTasks } from "./shared/schema";
 import { eq } from "drizzle-orm";
 
 // Get all follow-up tasks

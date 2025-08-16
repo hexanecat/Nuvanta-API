@@ -1,5 +1,15 @@
 import sgMail from '@sendgrid/mail';
-import { log } from './vite';
+
+// Simple logging function
+function log(message: string, source = "email") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
 
 // Initialize SendGrid with the API key
 if (!process.env.SENDGRID_API_KEY) {
