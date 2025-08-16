@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import bcrypt from 'bcrypt';
 import { db } from "./db";
 import { followUpTasks, users, copilotConversations, copilotMessages, copilotPrompts, calendarEvents } from "./shared/schema";
 import { followUpTasks as mockFollowUpTasks, nurses } from "./shared/mockData";
@@ -15,11 +16,16 @@ async function seedDatabase() {
       return;
     }
     
+    // Hash password for all users
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash("password123", saltRounds);
+    console.log("Generated hashed password for users");
+    
     // 1. First create users (no dependencies)
     console.log("Creating users...");
     const [adminUser] = await db.insert(users).values({
       username: "admin",
-      password: "password123", // In production, this should be hashed
+      password: hashedPassword,
       fullName: "System Admin",
       role: "admin"
     }).returning();
@@ -29,7 +35,7 @@ async function seedDatabase() {
     for (const nurse of nurses.slice(0, 5)) { // Just create a few nurse users
       const [nurseUser] = await db.insert(users).values({
         username: nurse.name.toLowerCase().replace(/\s+/g, '.'),
-        password: "password123",
+        password: hashedPassword,
         fullName: nurse.name,
         role: "nurse",
         unit: nurse.unit,
