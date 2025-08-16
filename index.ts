@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 
@@ -68,15 +69,9 @@ app.use((req, res, next) => {
     log("Running in production mode");
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  // Serve the API on port 3001 to avoid conflicts
+  const port = 3001;
+  server.listen(port, () => {
     log(`serving on port ${port}`);
   });
 })();
