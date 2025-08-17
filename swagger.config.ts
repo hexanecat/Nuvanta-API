@@ -41,6 +41,14 @@ const options = {
       }
     ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'JWT authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"'
+        }
+      },
       schemas: {
         User: {
           type: 'object',
@@ -126,7 +134,19 @@ const options = {
           properties: {
             success: { type: 'boolean' },
             message: { type: 'string' },
-            user: { $ref: '#/components/schemas/User' }
+            user: { $ref: '#/components/schemas/User' },
+            accessToken: { 
+              type: 'string', 
+              description: 'JWT access token (expires in 15 minutes)' 
+            },
+            refreshToken: { 
+              type: 'string', 
+              description: 'JWT refresh token (expires in 7 days)' 
+            },
+            expiresIn: { 
+              type: 'number', 
+              description: 'Access token expiration time in seconds' 
+            }
           }
         },
         StaffingData: {
