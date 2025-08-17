@@ -5,6 +5,9 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
 import { registerRoutes } from "./routes";
+import { globalErrorHandler, notFoundHandler, rateLimitErrorHandler } from "./routes/middleware";
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './swagger.config';
 
 // Simple logging function
 function log(message: string, source = "server") {
@@ -40,11 +43,9 @@ app.use(cors({
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: "Too many requests from this IP, please try again later.",
-  },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: rateLimitErrorHandler,
 });
 app.use(limiter);
 
@@ -85,7 +86,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Nuvanta API Documentation'
+}));
+
 // Health check endpoint
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     tags: [Health]
+ *     summary: Server health check
+ *     description: Returns server health status, uptime, and version information
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ */
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
@@ -99,25 +121,11 @@ app.get('/health', (req, res) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // 404 handler for unmatched routes
+  app.use(notFoundHandler);
+  
   // Global error handler
-  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    // Log error details
-    log(`Error ${status}: ${message} - ${req.method} ${req.path}`, "error");
-    
-    // Don't expose internal errors in production
-    const responseMessage = status === 500 && process.env.NODE_ENV === 'production' 
-      ? "Internal Server Error" 
-      : message;
-
-    res.status(status).json({ 
-      success: false,
-      message: responseMessage,
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    });
-  });
+  app.use(globalErrorHandler);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route

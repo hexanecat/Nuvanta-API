@@ -93,9 +93,12 @@ export function extractTaskFromPrompt(prompt: string): { id?: number, descriptio
   // Try to extract a task ID
   const idMatch = prompt.match(/task\s+#?(\d+)|#(\d+)|task\s+id\s+(\d+)|task\s+number\s+(\d+)/i);
   if (idMatch) {
-    const id = parseInt(idMatch[1] || idMatch[2] || idMatch[3] || idMatch[4]);
-    if (!isNaN(id)) {
-      return { id };
+    const matchedId = idMatch[1] || idMatch[2] || idMatch[3] || idMatch[4];
+    if (matchedId) {
+      const id = parseInt(matchedId);
+      if (!isNaN(id)) {
+        return { id };
+      }
     }
   }
   
